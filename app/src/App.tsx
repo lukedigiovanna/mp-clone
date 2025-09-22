@@ -1,7 +1,9 @@
+import { ThreeContainer } from "./components/ThreeContainer"
+
 function App() {
   return (
     <>
-      <div className="bg-gray-800" />
+      <ThreeContainer />
     </>
   )
 }
