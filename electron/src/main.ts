@@ -55,3 +55,7 @@ ipcMain.handle("host-stop", async () => {
     stopServer();
     return { success: true };
 });
+
+ipcMain.handle("quit-app", () => {
+    app.quit();
+})
