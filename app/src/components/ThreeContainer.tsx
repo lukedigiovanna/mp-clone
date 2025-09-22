@@ -1,17 +1,19 @@
 import * as React from "react";
-import { createScene } from "../three/createScene";
+import { Scene } from "../game/scene";
 
 const ThreeContainer: React.FC = () => {
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (!containerRef.current) return;
-        const { dispose } = createScene(containerRef.current);
-        return dispose;
-    }, [containerRef]);
+        const scene = new Scene(containerRef.current);
+        return () => {
+            scene.dispose();
+        };
+    }, []);
 
     return (
-        <div ref={containerRef} className="h-screen w-full bg-blue-400">
+        <div ref={containerRef} className="h-screen w-full">
         
         </div>
     )
