@@ -22,6 +22,7 @@ class ResourceManager {
                         path,
                         (tex) => {
                             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+                            tex.magFilter = tex.minFilter = THREE.NearestFilter;
                             this.textures[key] = tex;
                             console.log(`[texture-loader] loaded ${key}`)
                             resolve();
