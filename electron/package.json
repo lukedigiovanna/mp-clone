@@ -1,0 +1,17 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "pnpm build && electron .",
+    "build": "tsc src/preload.ts src/main.ts --outDir dist --esModuleInterop"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^38.1.2",
+    "typescript": "^5.9.2"
+  }
+}
