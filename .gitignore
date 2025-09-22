@@ -1,3 +1,4 @@
 server/build
+server/dependencies
 */node_modules
 electron/dist
