@@ -17,11 +17,13 @@ class ResourceManager {
         const promises = (Object.entries(TexturePaths) as [TextureKey, string][])
             .map(([key, path]) =>
                 new Promise<void>((resolve, reject) => {
+                    console.log(`[texture-loader] loading ${key} from ${path}`)
                     this.textureLoader.load(
                         path,
                         (tex) => {
                             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
                             this.textures[key] = tex;
+                            console.log(`[texture-loader] loaded ${key}`)
                             resolve();
                         },
                         undefined,
@@ -45,11 +47,13 @@ class ResourceManager {
     async loadModels(): Promise<void> {
         const promises = (Object.entries(ModelPaths) as [ModelKey, string][])
             .map(([key, path]) => {
-                new Promise<void>((resolve, reject) => {
+                return new Promise<void>((resolve, reject) => {
+                    console.log(`[model-loader] loading ${key} from ${path}`)
                     this.modelLoader.load(
                         path,
                         (data: GLTF) => {
                             this.models[key] = data;
+                            console.log(`[model-loader] loaded ${key}`)
                             resolve();
                         },
                         undefined,

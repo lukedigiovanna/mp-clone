@@ -67,7 +67,9 @@ class Scene {
         light.position.set(1, 1, 2);
         this.scene.add(light);
 
-        this.scene.add(Resources.getModel("TEAPOT").scene);
+        const teapot = Resources.getModel("TEAPOT").scene.clone();
+        teapot.scale.set(0.02, 0.02, 0.02);
+        this.scene.add(teapot);
 
         this.animate();
     }
