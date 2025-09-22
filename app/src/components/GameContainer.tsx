@@ -1,14 +1,14 @@
 import * as React from "react";
-import { Scene } from "../game/scene";
+import { Game } from "../game/game";
 
-const ThreeContainer: React.FC = () => {
+const GameContainer: React.FC = () => {
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (!containerRef.current) return;
-        const scene = new Scene(containerRef.current);
+        const game = new Game(containerRef.current);
         return () => {
-            scene.dispose();
+            game.dispose();
         };
     }, []);
 
@@ -19,4 +19,4 @@ const ThreeContainer: React.FC = () => {
     )
 }
 
-export { ThreeContainer };
+export { GameContainer };

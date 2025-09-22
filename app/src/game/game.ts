@@ -10,7 +10,7 @@ class SceneObject {
     }
 }
 
-class Scene {
+class Game {
     private scene: THREE.Scene;
     private camera: THREE.OrthographicCamera;
     private renderer: THREE.WebGLRenderer;
@@ -104,4 +104,4 @@ class Scene {
     }
 }
 
-export { Scene };
+export { Game };

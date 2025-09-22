@@ -1,9 +1,9 @@
-import { ThreeContainer } from "./components/ThreeContainer"
+import { GameContainer } from "./components/GameContainer"
 
 function App() {
   return (
     <>
-      <ThreeContainer />
+      <GameContainer />
     </>
   )
 }
