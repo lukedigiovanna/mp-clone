@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
-console.log('preload')
+
 contextBridge.exposeInMainWorld("electronAPI", {
-    startHost: (port) => ipcRenderer.invoke("host-start", { port }),
+    startHost: () => ipcRenderer.invoke("host-start"),
     stopHost: () => ipcRenderer.invoke("host-stop"),
     quitApp: () => ipcRenderer.invoke("quit-app"),
 });

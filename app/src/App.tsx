@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router";
 import { MainPage } from "./pages/MainPage";
 import { GamePage } from "./pages/GamePage";
+import { LobbyPage } from "./pages/LobbyPage";
 
 function App() {
     return (
@@ -12,6 +13,7 @@ function App() {
             </button> */}
             <Route path="/" Component={MainPage} />
             <Route path="/game" Component={GamePage} />
+            <Route path="/lobby" Component={LobbyPage} />
         </Routes>
     )
 }

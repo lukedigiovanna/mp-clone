@@ -6,6 +6,7 @@
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
+#include <asio.hpp>
 
 using Server = websocketpp::server<websocketpp::config::asio>;
 
@@ -17,6 +18,18 @@ void onOpen(websocketpp::connection_hdl handle) {
 }
 void onClose(websocketpp::connection_hdl handle) {
     LOG_INFO << "Connection closed";
+}
+
+std::string get_local_ip_address() {
+    asio::io_context ctx;
+    asio::ip::udp::resolver resolver(ctx);
+    asio::ip::udp::socket socket(ctx);
+    asio::ip::udp::endpoint ep(asio::ip::address::from_string("8.8.8.8"), 53);
+
+    socket.connect(ep);
+    auto local_ep = socket.local_endpoint();
+    std::string ip = local_ep.address().to_string();
+    return ip;
 }
 
 int main(int argc, char* argv[]) {
@@ -38,9 +51,17 @@ int main(int argc, char* argv[]) {
 
         // get port from server
         asio::error_code ec;
-        uint16_t port = server.get_local_endpoint(ec).port();
+        auto endpoint = server.get_local_endpoint(ec);
+        if (ec) {
+            LOG_ERROR << "Error getting local endpoint: " << ec.message();
+            return 1;
+        }
+        std::string ip = get_local_ip_address();
+        uint16_t port = endpoint.port();
 
-        LOG_INFO << "Listening for clients on ::" << port;
+        std::cout << "{ \"ip\": \"" << ip << "\", \"port\": " << port << " }" << std::endl;
+
+        LOG_INFO << "Listening for clients on " << ip << ":" << port;
 
         server.run();
     } catch (const websocketpp::exception &e) {

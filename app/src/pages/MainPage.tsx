@@ -13,8 +13,10 @@ const MainPage: React.FC = () => {
     const menuButtons: MenuButton[] = [
         {
             text: "Host Game",
-            onClick() {
-                navigate("/game");
+            async onClick() {
+                const response = await window.electronAPI.startHost();
+                console.log(response);
+                navigate("/lobby");
             }
         },
         {

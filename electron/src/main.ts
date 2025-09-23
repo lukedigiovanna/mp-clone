@@ -4,6 +4,8 @@ import { spawn } from "child_process";
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import path from "path";
 
+const isDevelopment = process.env.NODE_ENV !== 'production'
+
 console.log(__dirname)
 
 let serverProc: ChildProcessWithoutNullStreams | null = null;
@@ -19,24 +21,58 @@ const createWindow = () => {
     });
 
     win.loadURL('http://localhost:5173')
+
+    if (isDevelopment) {
+        win.webContents.openDevTools()
+    }
+
+    win.webContents.on('devtools-opened', () => {
+        win.focus()
+        setImmediate(() => {
+            win.focus()
+        })
+    })
 }
 
 app.whenReady().then(() => {
     createWindow();
 });
 
-function spawnServer(port = 3000) {
-    if (serverProc) return;
-    const exeName = "test";
-    const exePath = path.join(process.resourcesPath, "server", exeName);
-    serverProc = spawn(exePath, [`--port=${port}`], { stdio: "pipe" });
+function spawnServer(): Promise<{ip: string, port: number}> {
+    return new Promise<{ip: string, port: number}>((resolve, reject) => {
+        if (serverProc) {
+            reject("Already running a server on this instance");
+            return;
+        }
 
-    serverProc.stdout.on("data", d => console.log("[server stdout]", d.toString()));
-    serverProc.stderr.on("data", d => console.error("[server stderr]", d.toString()));
-    serverProc.on("close", code => {
-        console.log("[server] closed", code);
-        serverProc = null;
-    });
+        const exePath = path.join(process.resourcesPath, "server");
+        serverProc = spawn(exePath, [], { stdio: "pipe" });
+
+        const timeout = setTimeout(() => {
+            serverProc?.kill();
+            reject("Timed out");
+        }, 1000);
+    
+        serverProc.stdout.on("data", d => {
+            console.log(d.toString())
+            try {
+                const json = JSON.parse(d);
+                if ("ip" in json && "port" in json) {
+                    clearTimeout(timeout);
+                    const ip = json["ip"];
+                    const port = json["port"];
+                    console.log("started a server on", ip + ":" + port);
+                    resolve({ ip, port });
+                }
+            }
+            catch (e) {}
+        });
+        serverProc.stderr.on("data", d => console.error(d.toString()));
+        serverProc.on("close", code => {
+            console.log("[server] closed", code);
+            serverProc = null;
+        });
+    })
 }
 
 function stopServer() {
@@ -45,10 +81,10 @@ function stopServer() {
   serverProc = null;
 }
 
-ipcMain.handle("host-start", async (_e, { port }) => {
+ipcMain.handle("host-start", async () => {
     console.log("starting server");
-    spawnServer(port);
-    return { success: true };
+    const address = await spawnServer();
+    return { success: true, address };
 });
 ipcMain.handle("host-stop", async () => {
     console.log("stopping server");
