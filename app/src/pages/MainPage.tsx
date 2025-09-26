@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router";
+import client from "../networking/client";
 
 interface MenuButton {
     text: string;
@@ -14,9 +15,29 @@ const MainPage: React.FC = () => {
         {
             text: "Host Game",
             async onClick() {
-                const response = await window.electronAPI.startHost();
-                console.log(response);
-                navigate("/lobby");
+                let address;
+                try {
+                    const response = await window.electronAPI.startHost();
+                    if (!response.success) {
+                        throw Error();
+                    }
+                    address = response.address;
+                }
+                catch {
+                    alert("Failed to start server!");
+                    return;
+                }
+                try {
+                    const connected = await client.connect(address);
+                    if (!connected) {
+                        window.electronAPI.stopHost();
+                        throw Error();
+                    }
+                    navigate("/lobby");
+                }
+                catch {
+                    alert("Failed to join server");
+                }
             }
         },
         {

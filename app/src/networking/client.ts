@@ -1,19 +1,34 @@
 class Client {
-    private ws: WebSocket;
+    private ws: WebSocket | null = null;
 
-    constructor(url: string) {
-        this.ws = new WebSocket(url);
-        this.ws.onopen = this.onOpen.bind(this);
-        this.ws.onmessage = this.onMessage.bind(this);
+    constructor() {
+        
     }
 
-    private onOpen(ev: Event) {
-        console.log("ws open", ev);
+    public connect(address: { ip: string, port: number }): Promise<boolean> {
+        return new Promise<boolean>((resolve, ) => {
+            console.log(this);
+            try {
+                const url = `ws://${address.ip}:${address.port}`;
+                this.ws = new WebSocket(url);
+                this.ws.onmessage = this.onMessage.bind(this);
+                this.ws.onopen = () => {
+                    resolve(true);
+                }
+                this.ws.onerror = () => {
+                    resolve(false);
+                }
+            }
+            catch {
+                resolve(false);
+            }
+        })
     }
 
-    private onMessage(ev: Event) {
-        console.log("ws message", ev);
+    private onMessage(ev: MessageEvent) {
+        console.log("ws message", JSON.parse(ev.data));
     }
 }
 
-export { Client };
+const client = new Client();
+export default client;

@@ -1,4 +1,5 @@
 server/build
 server/dependencies
+server/src/nlohmann_json.hpp
 */node_modules
 electron/dist
