@@ -1,3 +1,5 @@
+import { useIP } from "../store/useIP";
+
 class Client {
     private ws: WebSocket | null = null;
 
@@ -13,6 +15,7 @@ class Client {
                 this.ws = new WebSocket(url);
                 this.ws.onmessage = this.onMessage.bind(this);
                 this.ws.onopen = () => {
+                    useIP.getState().setIP(url);
                     resolve(true);
                 }
                 this.ws.onerror = () => {
