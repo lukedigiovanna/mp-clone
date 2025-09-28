@@ -1,9 +1,12 @@
 import * as React from "react";
 import { useNavigate } from "react-router";
+
 import client from "../networking/client";
+import { isElectron } from "../store/isElectron";
 
 interface MenuButton {
     text: string;
+    enabled: boolean;
     onClick: () => void;
 }
 
@@ -14,6 +17,7 @@ const MainPage: React.FC = () => {
     const menuButtons: MenuButton[] = [
         {
             text: "Host Game",
+            enabled: isElectron(),
             async onClick() {
                 let address;
                 try {
@@ -42,18 +46,21 @@ const MainPage: React.FC = () => {
         },
         {
             text: "Join Game",
+            enabled: true,
             onClick() {
                 navigate("/join");
             }
         },
         {
             text: "Settings",
+            enabled: true,
             onClick() {
 
             }
         },
         {
             text: "Quit",
+            enabled: isElectron(),
             onClick() {
                 window.electronAPI.quitApp();
             }
@@ -69,9 +76,11 @@ const MainPage: React.FC = () => {
                 {
                     menuButtons.map((menuButton, i) => (
                         <button 
+                            disabled={!menuButton.enabled}
                             key={i}
                             onClick={menuButton.onClick}
-                            className="cursor-pointer bg-yellow-300 border-4 border-black rounded-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] px-8 py-2 font-bold uppercase tracking-widest text-lg font-mono hover:bg-pink-400 active:shadow-none transition-all duration-75 max-w-xs w-full">
+                            title={menuButton.enabled ? "" : "This action only works in an Electron client"}
+                            className="cursor-pointer bg-yellow-300 border-4 border-black rounded-none shadow-[4px_4px_0_0_rgba(0,0,0,1)] px-8 py-2 font-bold uppercase tracking-widest text-lg font-mono hover:bg-pink-400 active:shadow-none transition-all duration-75 max-w-xs w-full disabled:opacity-50 disabled:cursor-auto disabled:bg-yellow-300">
                             { menuButton.text }
                         </button>
                     ))

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useIPAddress } from "../store/useIPAddress";
+import { useNavigate } from "react-router";
 
 const players = [
   { name: "Player 1", isCPU: false, ready: false, character: "Mario" },
@@ -13,6 +14,7 @@ const characters = ["Teapot"] as const;
 
 const LobbyPage: React.FC = () => {
     const address = useIPAddress((state) => state.address);
+    const navigate = useNavigate();
 
     const copyIP = React.useCallback(async () => {
         if (!address) {
@@ -26,10 +28,16 @@ const LobbyPage: React.FC = () => {
         }
     }, [address]);
 
+    React.useEffect(() => {
+        if (!address) {
+            navigate("/");
+        }
+    }, [navigate, address])
+
     if (!address) {
         return (
             <div>
-                Loading...
+                You are not connected, navigate <a href="/" className="text-blue-500 underline">home</a>...
             </div>
         )
     } 
