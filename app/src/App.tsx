@@ -2,18 +2,15 @@ import { Routes, Route } from "react-router";
 import { MainPage } from "./pages/MainPage";
 import { GamePage } from "./pages/GamePage";
 import { LobbyPage } from "./pages/LobbyPage";
+import { JoinPage } from "./pages/JoinPage";
 
 function App() {
     return (
         <Routes>
-            {/* <button className="absolute" onClick={() => {
-                window.electronAPI.startHost(3000);
-            }}>
-                Hello
-            </button> */}
             <Route path="/" Component={MainPage} />
             <Route path="/game" Component={GamePage} />
             <Route path="/lobby" Component={LobbyPage} />
+            <Route path="/join" Component={JoinPage} />
         </Routes>
     )
 }

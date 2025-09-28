@@ -8,22 +8,16 @@ class Client {
     }
 
     public connect(address: { ip: string, port: number }): Promise<boolean> {
-        return new Promise<boolean>((resolve, ) => {
-            console.log(this);
-            try {
-                const url = `ws://${address.ip}:${address.port}`;
-                this.ws = new WebSocket(url);
-                this.ws.onmessage = this.onMessage.bind(this);
-                this.ws.onopen = () => {
-                    useIPAddress.getState().setAddress(address);
-                    resolve(true);
-                }
-                this.ws.onerror = () => {
-                    resolve(false);
-                }
+        return new Promise<boolean>((resolve, reject) => {
+            const url = `ws://${address.ip}:${address.port}`;
+            this.ws = new WebSocket(url);
+            this.ws.onmessage = this.onMessage.bind(this);
+            this.ws.onopen = () => {
+                useIPAddress.getState().setAddress(address);
+                resolve(true);
             }
-            catch {
-                resolve(false);
+            this.ws.onerror = () => {
+                reject();
             }
         })
     }

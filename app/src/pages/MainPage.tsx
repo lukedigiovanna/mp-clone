@@ -43,7 +43,7 @@ const MainPage: React.FC = () => {
         {
             text: "Join Game",
             onClick() {
-                navigate("/game");
+                navigate("/join");
             }
         },
         {
