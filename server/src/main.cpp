@@ -28,17 +28,30 @@ std::string get_local_ip_address() {
 
 class Player {
 private:
+    const int id;
     int characterId;
     int stars;
     int coins;
-    bool isCPU;
     websocketpp::connection_hdl ws_handle;
+public:    
+    bool isCPU;
 public:
-    Player() : characterId(0), stars(0), coins(0), isCPU(true) {
+    Player(int id) : 
+        id(id), 
+        characterId(0), 
+        stars(0), 
+        coins(0), 
+        isCPU(true) {
 
     }
+
+    inline const int get_id() const {
+        return id;
+    }
+
     inline json get_json() const {
         return json{
+            {"id", id},
             {"characterId", characterId},
             {"stars", stars},
             {"coins", coins},
@@ -57,19 +70,28 @@ enum Phase {
 };
 const std::string phase_string[2] = {"lobby", "board"};
 
+enum ErrorCode {
+    JOIN_FAILURE
+};
+const std::string error_string[1] = {"join_failure"};
+
+#define NUM_PLAYERS 1
+
 // the high level game manager. will deal with states and whatever as needed
 class Game {
 private:
     Server& server;
     Phase phase;
 
-    std::array<Player, 4> players;
-    int humanPlayers = 0;
     int tick = 0;
+
+    std::vector<Player> players;
     std::vector<websocketpp::connection_hdl> connections;
 public:
     Game(Server& server) : phase(LOBBY), server(server) {
-        
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            players.emplace_back(i + 1);
+        }
     }
 
     void broadcast_state() {
@@ -78,15 +100,52 @@ public:
         }
     }
 
+    void send_error(websocketpp::connection_hdl hdl, ErrorCode ec, const std::string& message) {
+        json error_message = {
+            {"code", ec},
+            {"codeString", error_string[ec]},
+            {"message", message},
+        };
+        json response = {
+            {"error", error_message}
+        };
+        this->server.send(hdl, response.dump(), websocketpp::frame::opcode::text);
+    }
+
+    int get_number_of_human_players() {
+        int n = 0;
+        for (int i = 0; i < players.size(); i++) {
+            if (!players[i].isCPU) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     void on_client_connect(websocketpp::connection_hdl handle) {
         LOG_INFO << "client connected...";
-        if (humanPlayers >= 4) {
-            this->server.send(handle, "too many players", websocketpp::frame::opcode::text);
+        int availableIndex = -1;
+        for (int i = 0; i < players.size(); i++) {
+            if (players[i].isCPU) {
+                availableIndex = i;
+                break;
+            }
+        }
+        if (availableIndex < 0) {
+            send_error(handle, ErrorCode::JOIN_FAILURE, "The game is already full");
             return;
         }
-        players[humanPlayers].set_ws_handle(handle);
-        humanPlayers++;
+        Player& player = players[availableIndex];
+        player.isCPU = false;
+        player.set_ws_handle(handle);
         this->connections.push_back(handle);
+        json player_json = player.get_json();
+        json response = {
+            {"join", {
+                {"player", player_json}
+            }}
+        };
+        this->server.send(handle, response.dump(), websocketpp::frame::opcode::text);
         tick++;
         broadcast_state();
     }
@@ -100,18 +159,22 @@ public:
 
     }
 
-    inline json get_state_json() {
+    json get_state_json() {
         json data = {};
         json player_array = json::array();
         for (const auto& player : players) {
             player_array.push_back(player.get_json());
         }
-        return json{
+        json state = json{
             {"phase", phase_string[phase]},
             {"players", player_array},
             {"data", data},
             {"tick", tick},
         };
+        json response = {
+            {"state", state}
+        };
+        return response;
     }
 };
 
