@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useIP } from "../store/useIP";
+import { useIPAddress } from "../store/useIPAddress";
 
 const players = [
   { name: "Player 1", isCPU: false, ready: false, character: "Mario" },
@@ -12,13 +12,36 @@ const characters = ["Teapot"] as const;
 // type Character = typeof characters[number];
 
 const LobbyPage: React.FC = () => {
-    const ip = useIP((state) => state.ip); 
+    const address = useIPAddress((state) => state.address);
+
+    const copyIP = React.useCallback(async () => {
+        if (!address) {
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(`${address.ip}:${address.port}`);
+        }
+        catch (e) {
+            alert("failed to copy: " + e);
+        }
+    }, [address]);
+
+    if (!address) {
+        return (
+            <div>
+                Loading...
+            </div>
+        )
+    } 
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-yellow-100 via-pink-200 to-yellow-300 flex flex-col items-center justify-start">
-            <h1 className="mt-8 text-2xl font-extrabold uppercase font-mono bg-yellow-200 border-4 border-black rounded-none shadow-[6px_6px_0_0_rgba(0,0,0,1)] px-6 py-3 mb-8 w-fit mx-auto tracking-widest text-black text-center">
-                Lobby {ip}
+            <h1 className="mt-8 text-2xl font-extrabold uppercase font-mono bg-yellow-200 border-4 border-black rounded-none shadow-[6px_6px_0_0_rgba(0,0,0,1)] px-6 py-3 mb-4 w-fit mx-auto tracking-widest text-black text-center">
+                Lobby
             </h1>
+            <h3 className="mb-4 p-2 text-sm font-mono bg-yellow-100 hover:bg-yellow-200 border-2 border-black cursor-pointer" onClick={copyIP}>
+                {address.ip}:{address.port}
+            </h3>
             <div className="grid grid-cols-2 grid-rows-2 gap-8 mb-12">
                 {players.map((player, i) => (
                 <div key={i} className="flex flex-col items-center bg-yellow-200 border-4 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] px-6 py-4 min-w-[180px] min-h-[180px] rounded-none">
