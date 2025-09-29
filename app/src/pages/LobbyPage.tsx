@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useIPAddress } from "../store/useIPAddress";
 import { useNavigate } from "react-router";
+import { useJoinStatus } from "../store/useJoinStatus";
 
 const players = [
   { name: "Player 1", isCPU: false, ready: false, character: "Mario" },
@@ -14,6 +15,8 @@ const characters = ["Teapot"] as const;
 
 const LobbyPage: React.FC = () => {
     const address = useIPAddress((state) => state.address);
+    const joinStatus = useJoinStatus((state) => state.status);
+    const joinError = useJoinStatus((state) => state.error);
     const navigate = useNavigate();
 
     const copyIP = React.useCallback(async () => {
@@ -40,7 +43,28 @@ const LobbyPage: React.FC = () => {
                 You are not connected, navigate <a href="/" className="text-blue-500 underline">home</a>...
             </div>
         )
-    } 
+    }
+
+    if (joinStatus === "pending") {
+        return (
+            <div>
+                Joining...
+            </div>
+        );
+    }
+
+    if (joinStatus === "failure") {
+        return (
+            <div>
+                <p>
+                    Failed to join game.
+                </p>
+                <p>
+                    Reason: {joinError?.message}
+                </p>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-yellow-100 via-pink-200 to-yellow-300 flex flex-col items-center justify-start">

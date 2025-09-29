@@ -1,4 +1,8 @@
+import { ErrorCode, type ServerError } from "../models/error";
+import type { ErrorPayload, JoinPayload, Payload } from "../models/payload";
 import { useIPAddress } from "../store/useIPAddress";
+import { useJoinStatus } from "../store/useJoinStatus";
+import { usePlayer } from "../store/usePlayer";
 
 class Client {
     private ws: WebSocket | null = null;
@@ -22,8 +26,24 @@ class Client {
         })
     }
 
+    private handleError(error: ServerError) {
+        if (error.code === ErrorCode.JOIN_FAILURE) {
+            useJoinStatus.getState().setStatus("failure", error);
+        }
+    }
+
     private onMessage(ev: MessageEvent) {
-        console.log("ws message", JSON.parse(ev.data));
+        const data = JSON.parse(ev.data) as Payload;
+        console.log(`Received: ${ev.data}`);
+        if ("error" in data) {
+            const payload = data as ErrorPayload;
+            this.handleError(payload.error);
+            console.error(payload.error.message);
+        }
+        else if ("join" in data) {
+            const payload = data as JoinPayload;
+            usePlayer.getState().setPlayer(payload.join.player);
+        }
     }
 }
 
